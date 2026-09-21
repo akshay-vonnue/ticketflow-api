@@ -1,5 +1,6 @@
 import type { Prisma, TicketPriority, TicketStatus } from '@prisma/client';
 import { prisma } from '../../db/prisma.js';
+import type { AuthUser } from '../../types/auth.js';
 
 const ticketInclude = {
   createdBy: {
@@ -92,7 +93,35 @@ export class TicketRepository {
     return { items, total };
   }
 
-  async update(id: string, data: Prisma.TicketUncheckedUpdateInput) {
+  async update(
+    id: string,
+    data: Prisma.TicketUncheckedUpdateInput,
+    user?: AuthUser
+  ) {
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id: id
+      }
+    });
+
+    if (ticket && data.status && user) {
+      return prisma.$transaction([
+        prisma.ticket.update({
+          where: { id },
+          data,
+          include: ticketInclude
+        }),
+        prisma.statusHistory.create({
+          data: {
+            ticketId: id,
+            changedById: user?.userId,
+            from: ticket.status,
+            to: data.status as TicketStatus
+          }
+        })
+      ]);
+    }
+
     return prisma.ticket.update({
       where: { id },
       data,

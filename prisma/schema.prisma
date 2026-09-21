@@ -54,6 +54,7 @@ model Ticket {
   createdBy    User           @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: Restrict)
   assignedTo   User?          @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
   comments     Comment[]      @relation("ticketCommentedOn")
+  statusHistories StatusHistory[] @relation("ticketStatusChanged")
 
   @@index([createdById])
   @@index([assignedToId])
@@ -75,5 +76,7 @@ model StatusHistory {
   changedById String
   from        TicketStatus
   to          TicketStatus
+  ticketId    String
   changedBy   User         @relation("ChangedStatus", fields: [changedById], references: [id], onDelete: Restrict)
+  ticket      Ticket       @relation("ticketStatusChanged", fields: [ticketId], references: [id], onDelete: Cascade)
 }

@@ -28,16 +28,16 @@ enum TicketPriority {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
+  id              String          @id @default(cuid())
+  email           String          @unique
   passwordHash    String
   name            String
-  role            Role     @default(USER)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  createdTickets  Ticket[] @relation("CreatedTickets")
-  assignedTickets Ticket[] @relation("AssignedTickets")
-  comments        Comment[] @relation("CommentedTickets")
+  role            Role            @default(USER)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  createdTickets  Ticket[]        @relation("CreatedTickets")
+  assignedTickets Ticket[]        @relation("AssignedTickets")
+  comments        Comment[]       @relation("CommentedTickets")
   statusHistories StatusHistory[] @relation("ChangedStatus")
 }
 
@@ -53,6 +53,7 @@ model Ticket {
   updatedAt    DateTime       @updatedAt
   createdBy    User           @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: Restrict)
   assignedTo   User?          @relation("AssignedTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  comments     Comment[]      @relation("ticketCommentedOn")
 
   @@index([createdById])
   @@index([assignedToId])
@@ -60,18 +61,19 @@ model Ticket {
   @@index([priority])
 }
 
-
-model Comment{
-  id            String        @id @default(cuid())
-  comment       String    
+model Comment {
+  id            String @id @default(cuid())
+  comment       String
   commentedById String
-  createdBy     User          @relation("CommentedTickets",fields: [commentedById],references: [id],onDelete: Restrict)
+  createdBy     User   @relation("CommentedTickets", fields: [commentedById], references: [id], onDelete: Restrict)
+  ticketId      String
+  ticket        Ticket @relation("ticketCommentedOn", fields: [ticketId], references: [id], onDelete: Cascade)
 }
 
-model StatusHistory{
-  id            String        @id @default(cuid())
-  changedById   String
-  from          TicketStatus
-  to            TicketStatus
-  changedBy     User          @relation("ChangedStatus",fields: [changedById],references: [id],onDelete: Restrict)
+model StatusHistory {
+  id          String       @id @default(cuid())
+  changedById String
+  from        TicketStatus
+  to          TicketStatus
+  changedBy   User         @relation("ChangedStatus", fields: [changedById], references: [id], onDelete: Restrict)
 }

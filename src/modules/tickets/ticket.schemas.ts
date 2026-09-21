@@ -42,8 +42,14 @@ export const assignTicketSchema = z.object({
   assignedToId: z.string().min(1)
 });
 
+export const addTicketCommentSchema = z.object({
+  comment: z.string().trim().min(1).max(120)
+});
+
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
 export type UpdateTicketInput = z.infer<typeof updateTicketSchema>;
 export type ChangeTicketStatusInput = z.infer<typeof changeTicketStatusSchema>;
 export type AssignTicketInput = z.infer<typeof assignTicketSchema>;
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
+
+export type AddTicketCommentInput = z.infer<typeof addTicketCommentSchema>;

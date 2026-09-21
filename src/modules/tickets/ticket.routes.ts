@@ -3,6 +3,7 @@ import { requireAuth } from '../../middleware/auth.middleware.js';
 import { validate } from '../../middleware/validation.middleware.js';
 import { ticketController } from './ticket.controller.js';
 import {
+  addTicketCommentSchema,
   assignTicketSchema,
   changeTicketStatusSchema,
   createTicketSchema,
@@ -146,5 +147,13 @@ ticketRoutes.patch(
   validate({ params: ticketIdParamSchema, body: assignTicketSchema }),
   (req, res, next) => {
     ticketController.assign(req, res).catch(next);
+  }
+);
+
+ticketRoutes.post(
+  '/:id',
+  validate({ params: ticketIdParamSchema, body: addTicketCommentSchema }),
+  (req, res, next) => {
+    ticketController.add(req, res).catch(next);
   }
 );

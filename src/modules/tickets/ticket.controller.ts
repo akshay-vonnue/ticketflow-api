@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../../types/auth.js';
 import type {
+  AddTicketCommentInput,
   AssignTicketInput,
   ChangeTicketStatusInput,
   CreateTicketInput,
@@ -73,6 +74,16 @@ export class TicketController {
       (request.body as AssignTicketInput).assignedToId
     );
     response.json({ data: ticket });
+  }
+
+  async add(request: Request, response: Response) {
+    const comment = await ticketService.addComment(
+      authUser(request),
+      String(request.params.id),
+      (request.body as AddTicketCommentInput).comment
+    );
+
+    response.json({ data: comment });
   }
 }
 

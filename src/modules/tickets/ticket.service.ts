@@ -66,6 +66,10 @@ function canAssignTicket(user: AuthUser) {
   return user.role === Role.ADMIN || user.role === Role.AGENT;
 }
 
+function canAddComment(user: AuthUser) {
+  return user.role === Role.ADMIN || user.role === Role.AGENT;
+}
+
 function canDeleteTicket(user: AuthUser) {
   return user.role === Role.ADMIN;
 }
@@ -275,5 +279,17 @@ export class TicketService {
     }
 
     return repository.update(ticket.id, { assignedToId: assignee.id });
+  }
+
+  async addComment(currentUser: AuthUser, ticketId: string, comment: string) {
+    if (!canAddComment(currentUser)) {
+      throw new ForbiddenError('You are not allowed to assign comments');
+    }
+
+    return repository.addTicketComment({
+      ticketId: ticketId,
+      comment: comment,
+      commentedById: currentUser.userId
+    });
   }
 }

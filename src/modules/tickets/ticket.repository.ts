@@ -20,6 +20,23 @@ const ticketInclude = {
   }
 } satisfies Prisma.TicketInclude;
 
+const commentInclude = {
+  createdBy: {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true
+    }
+  },
+  ticket: {
+    select: {
+      title: true,
+      description: true
+    }
+  }
+};
+
 export type TicketWithRelations = Prisma.TicketGetPayload<{
   include: typeof ticketInclude;
 }>;
@@ -99,6 +116,13 @@ export class TicketRepository {
         name: true,
         email: true
       }
+    });
+  }
+
+  async addTicketComment(data: Prisma.CommentUncheckedCreateInput) {
+    return prisma.comment.create({
+      data,
+      include: commentInclude
     });
   }
 }

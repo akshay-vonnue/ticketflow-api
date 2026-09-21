@@ -37,6 +37,8 @@ model User {
   updatedAt       DateTime @updatedAt
   createdTickets  Ticket[] @relation("CreatedTickets")
   assignedTickets Ticket[] @relation("AssignedTickets")
+  comments        Comment[] @relation("CommentedTickets")
+  statusHistories StatusHistory[] @relation("ChangedStatus")
 }
 
 model Ticket {
@@ -56,4 +58,20 @@ model Ticket {
   @@index([assignedToId])
   @@index([status])
   @@index([priority])
+}
+
+
+model Comment{
+  id            String        @id @default(cuid())
+  comment       String    
+  commentedById String
+  createdBy     User          @relation("CommentedTickets",fields: [commentedById],references: [id],onDelete: Restrict)
+}
+
+model StatusHistory{
+  id            String        @id @default(cuid())
+  changedById   String
+  from          TicketStatus
+  to            TicketStatus
+  changedBy     User          @relation("ChangedStatus",fields: [changedById],references: [id],onDelete: Restrict)
 }

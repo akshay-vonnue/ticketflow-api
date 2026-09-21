@@ -147,7 +147,9 @@ describe('ticket API', () => {
       .send({ status: 'IN_PROGRESS' });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.status).toBe('IN_PROGRESS');
+    expect(response.body.data[0].status).toBe('IN_PROGRESS');
+    expect(response.body.data[1].from).toBe('OPEN');
+    expect(response.body.data[1].to).toBe('IN_PROGRESS');
   });
 
   it('rejects invalid status transitions', async () => {
@@ -202,5 +204,54 @@ describe('ticket API', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.error.code).toBe('INVALID_ASSIGNEE');
+  });
+
+  it('add comment to a ticket', async () => {
+    const ticketResponse = await api
+      .post('/api/tickets')
+      .set('Authorization', `Bearer ${user1Token}`)
+      .send({
+        title: 'Account settings page crashes',
+        description:
+          'Updating notification preferences crashes the page every time.',
+        priority: 'HIGH'
+      });
+
+    console.log(ticketResponse.body.data);
+
+    // expect(ticketResponse.body.data.title).toBe('Account settings page crashes');
+
+    const _assignResponse = await api
+      .patch(`/api/tickets/${ticketResponse.body.data.id}/assign`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        assignedToId: agentId
+      });
+
+    // console.log(assignResponse.body.data)
+
+    const statusResponse = await api
+      .patch(`/api/tickets/${ticketResponse.body.data.id}/status`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        status: 'IN_PROGRESS'
+      });
+
+    // console.log(statusResponse.body)
+
+    expect(statusResponse.body.data[0].title).toBe(
+      'Account settings page crashes'
+    );
+
+    const commentResponse = await api
+      .post(`/api/tickets/${ticketResponse.body.data.id}/`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        comment: 'this is a comment for the issue'
+      });
+
+    expect(commentResponse.body.data.comment).toBe(
+      'this is a comment for the issue'
+    );
   });
 });
